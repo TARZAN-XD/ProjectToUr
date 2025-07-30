@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام الإقتران | طرزان الواقدي</title>
+<style>
+    body { font-family: Arial; text-align: center; background: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { color: #222; }
+    img { width: 300px; margin: 20px auto; display: block; }
+    input { padding: 10px; width: 60%; margin: 10px auto; display: block; }
+    button { padding: 10px 20px; background: #007BFF; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .code { font-size: 18px; color: green; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>نظام الإقتران | طرزان الواقدي</h1>
+<div id="qr-box">
+    <p>انتظر ظهور QR...</p>
+</div>
+<hr>
+<h3>أدخل رقم هاتفك لطلب رمز الإقتران</h3>
+<input type="text" id="phone" placeholder="مثال: 9665xxxxxxx">
+<button onclick="requestCode()">طلب الرمز</button>
+<div id="pair-result" class="code"></div>
+<script>
+async function loadQR() {
+    const res = await fetch('/qr');
+    const data = await res.json();
+    if (data.qr) {
+        document.getElementById('qr-box').innerHTML = `<img src="${data.qr}" />`;
+    } else {
+        document.getElementById('qr-box').innerHTML = `<p>لا يوجد رمز QR متاح الآن</p>`;
+    }
+}
+setInterval(loadQR, 5000);
+
+async function requestCode() {
+    const phone = document.getElementById('phone').value;
+    if (!phone) return alert('أدخل رقم الهاتف');
+    const res = await fetch('/pair', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    if (data.code) {
+        document.getElementById('pair-result').innerText = `رمز الإقتران: ${data.code}`;
+    } else {
+        document.getElementById('pair-result').innerText = `خطأ: ${data.error}`;
+    }
+}
+</script>
+</body>
+</html>
